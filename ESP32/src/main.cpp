@@ -2,8 +2,8 @@
 #include "waterLevel.h"
 #include "webServer.h"
 
-#define RX_PIN 16
-#define TX_PIN 17
+#define RX_PIN 3
+#define TX_PIN 1
 #define SERIAL_BAUD 9600
 #define UPDATE_INTERVAL 1000
 
@@ -15,7 +15,7 @@ void parseUARTData(String data);
 
 void setup() {
     Serial.begin(115200);
-    Serial2.begin(SERIAL_BAUD, SERIAL_8N1, RX_PIN, TX_PIN);
+    Serial1.begin(SERIAL_BAUD, SERIAL_8N1, RX_PIN, TX_PIN);
     
     WaterLevel_Init();
     WebServer_Init();
@@ -30,8 +30,8 @@ void setup() {
 void loop() {
     WebServer_HandleClient();
     
-    while (Serial2.available()) {
-        char c = Serial2.read();
+    while (Serial1.available()) {
+        char c = Serial1.read();
         
         if (c == '\n') {
             if (uartBuffer.length() > 0) {
@@ -49,7 +49,7 @@ void loop() {
         systemStatus.waterLevel = waterLevelRaw;
         
         String waterCmd = "W" + String(waterLevelRaw);
-        Serial2.println(waterCmd);
+        Serial1.println(waterCmd);
         Serial.print("Sent water level to MCXC444: ");
         Serial.println(waterCmd);
         

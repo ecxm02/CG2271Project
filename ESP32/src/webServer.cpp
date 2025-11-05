@@ -1,12 +1,12 @@
 #include "webServer.h"
 #include <WiFi.h>
-#include <WebServer.h>
+#include <ESPAsyncWebServer.h>
 #include "../Common/config.h"
 
 #define AP_SSID "PlantWatering_ESP32"
 #define AP_PASSWORD "12345678"
 
-WebServer server(80);
+AsyncWebServer server(80);
 static SystemStatus_t currentStatus = {0};
 
 const char HTML_PAGE[] PROGMEM = R"rawliteral(
@@ -118,10 +118,6 @@ const char HTML_PAGE[] PROGMEM = R"rawliteral(
         }
     </style>
     <script>
-        function sendCommand(cmd) {
-            fetch('/cmd?c=' + cmd)
-                .then(() => setTimeout(() => location.reload(), 500));
-        }
         setInterval(() => location.reload(), 5000);
     </script>
 </head>
@@ -156,59 +152,49 @@ const char HTML_PAGE[] PROGMEM = R"rawliteral(
             <div class="status %LED_CLASS%">%LED_STATUS%</div>
         </div>
         
-        <div class="controls">
-            <h3>Manual Controls</h3>
-            <button class="button" onclick="sendCommand('P1')">Pump ON</button>
-            <button class="button button-danger" onclick="sendCommand('P0')">Pump OFF</button>
-            <button class="button" onclick="sendCommand('L1')">LED ON</button>
-            <button class="button button-danger" onclick="sendCommand('L0')">LED OFF</button>
-            <button class="button" onclick="sendCommand('A1')" style="width: calc(100% - 10px); background-color: #4caf50; margin-top: 10px;">🔄 Auto Mode</button>
-        </div>
     </div>
 </body>
 </html>
 )rawliteral";
 
-void handleRoot() {
-    String html = FPSTR(HTML_PAGE);
-    
-    if (currentStatus.waterLevel < WATER_LOW_THRESHOLD) {
-        String warningBanner = "<div class=\"warning-banner\">";
-        warningBanner += "<div class=\"icon\">⚠️</div>";
-        warningBanner += "<div>CRITICAL: WATER LEVEL TOO LOW!</div>";
-        warningBanner += "<div style=\"font-size: 14px; margin-top: 10px;\">Please refill water reservoir immediately</div>";
-        warningBanner += "<div style=\"font-size: 14px;\">🔴 Buzzer Active | 🚫 Watering Disabled</div>";
-        warningBanner += "</div>";
-        html.replace("%WARNING_BANNER%", warningBanner);
-        html.replace("%WATER_CLASS%", "water-low");
-    } else {
-        html.replace("%WARNING_BANNER%", "");
-        html.replace("%WATER_CLASS%", "");
+String processor(const String& var){
+    if(var == "SOIL"){
+        return String(currentStatus.soilMoisture);
     }
-    
-    html.replace("%SOIL%", String(currentStatus.soilMoisture));
-    html.replace("%LIGHT%", String(currentStatus.lightLevel));
-    html.replace("%WATER%", String(currentStatus.waterLevel));
-    
-    html.replace("%PUMP_STATUS%", currentStatus.pumpStatus ? "ON" : "OFF");
-    html.replace("%PUMP_CLASS%", currentStatus.pumpStatus ? "status-on" : "status-off");
-    
-    html.replace("%LED_STATUS%", currentStatus.ledStatus ? "ON" : "OFF");
-    html.replace("%LED_CLASS%", currentStatus.ledStatus ? "status-on" : "status-off");
-    
-    server.send(200, "text/html", html);
-}
-
-void handleCommand() {
-    if (server.hasArg("c")) {
-        String cmd = server.arg("c");
-        Serial.print("Sending command to MCXC444: ");
-        Serial.println(cmd);
-        Serial2.println(cmd);
-        server.send(200, "text/plain", "OK");
-    } else {
-        server.send(400, "text/plain", "Bad Request");
+    else if(var == "LIGHT"){
+        return String(currentStatus.lightLevel);
     }
+    else if(var == "WATER"){
+        return String(currentStatus.waterLevel);
+    }
+    else if(var == "PUMP_STATUS"){
+        return currentStatus.pumpStatus ? "ON" : "OFF";
+    }
+    else if(var == "PUMP_CLASS"){
+        return currentStatus.pumpStatus ? "status-on" : "status-off";
+    }
+    else if(var == "LED_STATUS"){
+        return currentStatus.ledStatus ? "ON" : "OFF";
+    }
+    else if(var == "LED_CLASS"){
+        return currentStatus.ledStatus ? "status-on" : "status-off";
+    }
+    else if(var == "WARNING_BANNER"){
+        if (currentStatus.waterLevel < WATER_LOW_THRESHOLD) {
+            String warningBanner = "<div class=\"warning-banner\">";
+            warningBanner += "<div class=\"icon\">⚠️</div>";
+            warningBanner += "<div>CRITICAL: WATER LEVEL TOO LOW!</div>";
+            warningBanner += "<div style=\"font-size: 14px; margin-top: 10px;\">Please refill water reservoir immediately</div>";
+            warningBanner += "<div style=\"font-size: 14px;\">🔴 Buzzer Active | 🚫 Watering Disabled</div>";
+            warningBanner += "</div>";
+            return warningBanner;
+        }
+        return "";
+    }
+    else if(var == "WATER_CLASS"){
+        return (currentStatus.waterLevel < WATER_LOW_THRESHOLD) ? "water-low" : "";
+    }
+    return String();
 }
 
 void WebServer_Init(void) {
@@ -219,15 +205,28 @@ void WebServer_Init(void) {
     Serial.print("IP Address: ");
     Serial.println(WiFi.softAPIP());
     
-    server.on("/", handleRoot);
-    server.on("/cmd", handleCommand);
+    server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
+        request->send_P(200, "text/html", HTML_PAGE, processor);
+    });
+
+    server.on("/command", HTTP_GET, [] (AsyncWebServerRequest *request) {
+        if (request->hasParam("c")) {
+            String cmd = request->getParam("c")->value();
+            Serial.print("Sending command to MCXC444: ");
+            Serial.println(cmd);
+            Serial1.println(cmd);
+            request->send(200, "text/plain", "OK");
+        } else {
+            request->send(400, "text/plain", "Bad Request");
+        }
+    });
     
     server.begin();
     Serial.println("Web server started");
 }
 
 void WebServer_HandleClient(void) {
-    server.handleClient();
+    // No longer needed with ESPAsyncWebServer
 }
 
 void WebServer_UpdateStatus(SystemStatus_t *status) {
