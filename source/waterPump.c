@@ -1,15 +1,15 @@
 #include "waterPump.h"
 #include "board.h"
 
-#define PUMP_PORT PORTD
-#define PUMP_GPIO GPIOD
+#define PUMP_PORT PORTA
+#define PUMP_GPIO GPIOA
 #define PUMP_PIN 2
 #define PUMP_PCR_MUX 1
 
 static uint8_t pumpStatus = 0;
 
 void WaterPump_Init(void) {
-    SIM->SCGC5 |= SIM_SCGC5_PORTD_MASK;
+    SIM->SCGC5 |= SIM_SCGC5_PORTA_MASK;
     PUMP_PORT->PCR[PUMP_PIN] = PORT_PCR_MUX(PUMP_PCR_MUX);
     PUMP_GPIO->PDDR |= (1 << PUMP_PIN);
     WaterPump_Off();

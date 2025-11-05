@@ -50,7 +50,8 @@ source/lightSensor.o source/lightSensor.d: ../source/lightSensor.c \
  C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\drivers/fsl_common_arm.h \
  C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\drivers/fsl_clock.h \
  C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\drivers/fsl_common.h \
- C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\drivers/fsl_gpio.h
+ C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\drivers/fsl_gpio.h \
+ ../source/led.h
 ../source/lightSensor.h:
 C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\board/board.h:
 C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\board/clock_config.h:
@@ -103,3 +104,4 @@ C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\drivers/fs
 C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\drivers/fsl_clock.h:
 C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\drivers/fsl_common.h:
 C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\drivers/fsl_gpio.h:
+../source/led.h:
