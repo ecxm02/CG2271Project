@@ -1,0 +1,21 @@
+# Eclipse IDE
+.settings/
+.metadata/
+.project
+.cproject
+
+# Build artifacts
+Debug/
+Release/
+*.axf
+*.bin
+*.elf
+*.hex
+*.map
+*.o
+*.d
+*.su
+
+# OS specific
+.DS_Store
+Thumbs.db
