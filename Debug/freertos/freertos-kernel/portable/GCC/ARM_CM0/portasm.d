@@ -3,8 +3,7 @@ freertos/freertos-kernel/portable/GCC/ARM_CM0/portasm.o \
  ../freertos/freertos-kernel/portable/GCC/ARM_CM0/portasm.c \
  ../freertos/freertos-kernel/portable/GCC/ARM_CM0/portasm.h \
  C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\freertos\freertos-kernel\include/FreeRTOS.h \
- C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\freertos\freertos-kernel\template/FreeRTOSConfig.h \
- C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\freertos\freertos-kernel\template\ARM_CM0/FreeRTOSConfig_Gen.h \
+ C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\source/FreeRTOSConfig.h \
  C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\freertos\freertos-kernel\include/projdefs.h \
  C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\freertos\freertos-kernel\include/portable.h \
  C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\freertos\freertos-kernel\include/deprecated_definitions.h \
@@ -14,8 +13,7 @@ freertos/freertos-kernel/portable/GCC/ARM_CM0/portasm.o \
  C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\freertos\freertos-kernel\include/mpu_syscall_numbers.h
 ../freertos/freertos-kernel/portable/GCC/ARM_CM0/portasm.h:
 C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\freertos\freertos-kernel\include/FreeRTOS.h:
-C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\freertos\freertos-kernel\template/FreeRTOSConfig.h:
-C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\freertos\freertos-kernel\template\ARM_CM0/FreeRTOSConfig_Gen.h:
+C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\source/FreeRTOSConfig.h:
 C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\freertos\freertos-kernel\include/projdefs.h:
 C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\freertos\freertos-kernel\include/portable.h:
 C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\freertos\freertos-kernel\include/deprecated_definitions.h:
