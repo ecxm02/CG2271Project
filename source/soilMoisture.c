@@ -1,6 +1,6 @@
-#include "soilMoisture.h"
+#include "includes/soilMoisture.h"
 #include "board.h"
-#include "waterPump.h"
+#include "includes/waterPump.h"
 
 #define SOIL_PORT PORTA
 #define SOIL_GPIO GPIOA

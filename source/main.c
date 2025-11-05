@@ -2,10 +2,10 @@
 #include "pin_mux.h"
 #include "FreeRTOS.h"
 #include "task.h"
-#include "led.h"
-#include "soilMoisture.h"
-#include "lightSensor.h"
-#include "waterPump.h"
+#include "includes/led.h"
+#include "includes/soilMoisture.h"
+#include "includes/lightSensor.h"
+#include "includes/waterPump.h"
 
 void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName) {
     (void)xTask;

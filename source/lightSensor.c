@@ -1,6 +1,6 @@
-#include "lightSensor.h"
+#include "includes/lightSensor.h"
 #include "board.h"
-#include "led.h"
+#include "includes/led.h"
 
 #define LDR_PORT PORTC
 #define LDR_GPIO GPIOC
