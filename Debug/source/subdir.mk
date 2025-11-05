@@ -4,37 +4,13 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
-../source/buzzer.c \
-../source/led.c \
-../source/lightSensor.c \
-../source/main.c \
-../source/mtb.c \
-../source/semihost_hardfault.c \
-../source/soilMoisture.c \
-../source/uart_comm.c \
-../source/waterPump.c 
+../source/main.c 
 
 C_DEPS += \
-./source/buzzer.d \
-./source/led.d \
-./source/lightSensor.d \
-./source/main.d \
-./source/mtb.d \
-./source/semihost_hardfault.d \
-./source/soilMoisture.d \
-./source/uart_comm.d \
-./source/waterPump.d 
+./source/main.d 
 
 OBJS += \
-./source/buzzer.o \
-./source/led.o \
-./source/lightSensor.o \
-./source/main.o \
-./source/mtb.o \
-./source/semihost_hardfault.o \
-./source/soilMoisture.o \
-./source/uart_comm.o \
-./source/waterPump.o 
+./source/main.o 
 
 
 # Each subdirectory must supply rules for building sources it contributes
@@ -49,7 +25,7 @@ source/%.o: ../source/%.c source/subdir.mk
 clean: clean-source
 
 clean-source:
-	-$(RM) ./source/buzzer.d ./source/buzzer.o ./source/led.d ./source/led.o ./source/lightSensor.d ./source/lightSensor.o ./source/main.d ./source/main.o ./source/mtb.d ./source/mtb.o ./source/semihost_hardfault.d ./source/semihost_hardfault.o ./source/soilMoisture.d ./source/soilMoisture.o ./source/uart_comm.d ./source/uart_comm.o ./source/waterPump.d ./source/waterPump.o
+	-$(RM) ./source/main.d ./source/main.o
 
 .PHONY: clean-source
 

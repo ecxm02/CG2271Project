@@ -1,37 +1,71 @@
-# System Architecture Diagram
+# Minimal MCXC444 Firmware Architecture# System Architecture Diagram
 
-## Overall System Flow
 
-```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                         PLANT WATERING SYSTEM                           │
-└─────────────────────────────────────────────────────────────────────────┘
 
-┌───────────────────────────────────┐    ┌────────────────────────────────┐
+This reset pares the MCXC444 firmware down to the two essentials requested:## Overall System Flow
+
+
+
+- **Sensors**```
+
+  - Soil moisture switch on `PTA1`┌─────────────────────────────────────────────────────────────────────────┐
+
+  - LDR light sensor on `PTC2`│                         PLANT WATERING SYSTEM                           │
+
+- **Actuators**└─────────────────────────────────────────────────────────────────────────┘
+
+  - Water pump driver on `PTA2`
+
+  - Indicator LED on `PTA5`┌───────────────────────────────────┐    ┌────────────────────────────────┐
+
 │          ESP32 Module             │    │       MCXC444 Module           │
-│  (Web Interface & Monitoring)     │◄──►│    (Smart Controller)          │
+
+## Firmware Layout│  (Web Interface & Monitoring)     │◄──►│    (Smart Controller)          │
+
 └───────────────────────────────────┘    └────────────────────────────────┘
-         │                                         │
-         │ Water Level                             │ Soil Moisture
-         │ Sensor (ADC)                            │ Sensor (ADC)
-         │                                         │
+
+```         │                                         │
+
+source/         │ Water Level                             │ Soil Moisture
+
+└── main.c          ← sole application module         │ Sensor (ADC)                            │ Sensor (ADC)
+
+```         │                                         │
+
          │ WiFi Access                             │ Light Sensor
-         │ Point                                   │ (LDR + ADC)
+
+All previous FreeRTOS, UART, buzzer, and ESP32 integration code has been removed from the build. The remaining dependencies are only the device, board, driver, and startup support files supplied by MCUXpresso.         │ Point                                   │ (LDR + ADC)
+
          │                                         │
-         │ Web Server                              │ LED Control
+
+## Control Flow         │ Web Server                              │ LED Control
+
          │ (Port 80)                               │ (GPIO)
-         │                                         │
-         │                                         │ Water Pump
-         │                                         │ Control (GPIO)
-         │                                         │
+
+1. `main()` boots clocks, then configures GPIO directions and interrupt sources.         │                                         │
+
+2. Rising and falling edges on the soil sensor (`PORTA_IRQn`) update the dry flag and drive the pump output immediately.         │                                         │ Water Pump
+
+3. Edges on the LDR line (`PORTC_PORTD_IRQn`) update the dark flag and drive the LED output immediately.         │                                         │ Control (GPIO)
+
+4. The main loop executes `__WFI()` forever; all work happens inside the GPIO ISRs.         │                                         │
+
          └─────────────────────────────────────────┘
-                    UART Communication
+
+This deliberately omits any FreeRTOS scheduler, UART messaging, or safety logic so that the behaviour is easy to observe while validating the hardware connections.                    UART Communication
+
                   (TX/RX @ 9600 baud)
-```
 
-## Data Flow Architecture
+## Debug Support```
 
-```
+
+
+`main.c` also defines a HardFault capture helper. If a crash occurs, the handler stores the stacked PC/stack pointer in globals and triggers a breakpoint so the faulting instruction can be identified quickly during bring-up.## Data Flow Architecture
+
+
+
+Further features (buzzers, water-level integration, ESP32 communication, FreeRTOS tasks, etc.) can be reintroduced incrementally once the basic sensor/actuator loop is confirmed on hardware.```
+
 ┌──────────────────────────────────────────────────────────────────────┐
 │                        AUTOMATIC MODE                                │
 └──────────────────────────────────────────────────────────────────────┘

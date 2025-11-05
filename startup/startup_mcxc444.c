@@ -359,7 +359,24 @@ WEAK_AV void NMI_Handler(void)
 }
 
 WEAK_AV void HardFault_Handler(void)
-{ while(1) {}
+{
+    __asm(  ".syntax unified\n"
+            " movs r0, #4\n"
+            " mov r1, lr\n"
+            " tst r0, r1\n"
+            " beq _MSP\n"
+            " mrs r0, psp\n"
+            " b _GetPC\n"
+            "_MSP:\n"
+            " mrs r0, msp\n"
+            "_GetPC:\n"
+            " ldr r1, [r0, #24]\n"
+            " ldr r2, [r1, #0]\n"
+            " bkpt #0\n"
+            "_loop:\n"
+            " b _loop\n"
+            ".syntax divided\n"
+    );
 }
 
 WEAK_AV void SVC_Handler(void)
