@@ -15,6 +15,9 @@
 #define PUMP_PORT PORTD
 #define PUMP_PIN 2
 
+#define BUZZER_PORT PORTD
+#define BUZZER_PIN 3
+
 #define SOIL_ADC_CHANNEL 8
 #define LIGHT_ADC_CHANNEL 9
 

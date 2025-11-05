@@ -1,0 +1,7 @@
+../source/main.c:52:5:main	16	static
+../source/main.c:93:6:SensorTask	40	static
+../source/main.c:111:6:ControlTask	32	static
+../source/main.c:155:6:UARTTask	48	static
+../source/main.c:228:6:SafetyTask	24	static
+../source/main.c:248:6:vApplicationStackOverflowHook	16	static
+../source/main.c:255:6:vApplicationMallocFailedHook	8	static

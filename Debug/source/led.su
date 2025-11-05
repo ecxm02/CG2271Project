@@ -1,0 +1,7 @@
+../source/led.c:18:6:LED_Init	8	static
+../source/led.c:33:6:LED_SetColor	16	static
+../source/led.c:41:6:LED_On	16	static
+../source/led.c:58:6:LED_Off	16	static
+../source/led.c:75:6:LED_Toggle	16	static
+../source/led.c:92:6:LED_AllOff	8	static
+../source/led.c:98:9:LED_GetStatus	16	static

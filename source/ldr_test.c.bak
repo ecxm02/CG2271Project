@@ -1,0 +1,44 @@
+#include "board.h"
+#include "led.h"
+#include "lightSensor.h"
+
+void delay_ms(uint32_t ms);
+
+volatile uint32_t msTicks = 0;
+
+void SysTick_Handler(void) {
+    msTicks++;
+}
+
+void delay_ms(uint32_t ms) {
+    uint32_t start = msTicks;
+    while ((msTicks - start) < ms);
+}
+
+int main(void) {
+    uint8_t ldrState;
+    uint8_t prevState = 2;
+    
+    SystemCoreClockUpdate();
+    SysTick_Config(SystemCoreClock / 1000);
+    
+    LED_Init();
+    LightSensor_Init();
+    
+    LED_AllOff();
+    
+    while(1) {
+        ldrState = LightSensor_Read();
+        
+        if (ldrState != prevState) {
+            if (ldrState == 1) {
+                LED_On(LED_BLUE);
+            } else {
+                LED_Off(LED_BLUE);
+            }
+            prevState = ldrState;
+        }
+        
+        delay_ms(50);
+    }
+}

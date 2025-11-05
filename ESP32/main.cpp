@@ -45,7 +45,13 @@ void loop() {
     
     unsigned long currentTime = millis();
     if (currentTime - lastUpdate >= UPDATE_INTERVAL) {
-        systemStatus.waterLevel = WaterLevel_GetPercentage();
+        uint8_t waterLevelRaw = WaterLevel_GetPercentage();
+        systemStatus.waterLevel = waterLevelRaw;
+        
+        String waterCmd = "W" + String(waterLevelRaw);
+        Serial2.println(waterCmd);
+        Serial.print("Sent water level to MCXC444: ");
+        Serial.println(waterCmd);
         
         WebServer_UpdateStatus(&systemStatus);
         
@@ -62,10 +68,12 @@ void parseUARTData(String data) {
         int ledIdx = data.indexOf("\"led\":");
         
         if (soilIdx != -1) {
-            systemStatus.soilMoisture = data.substring(soilIdx + 7).toInt();
+            uint8_t soilDigital = data.substring(soilIdx + 7).toInt();
+            systemStatus.soilMoisture = soilDigital ? 0 : 100;
         }
         if (lightIdx != -1) {
-            systemStatus.lightLevel = data.substring(lightIdx + 8).toInt();
+            uint8_t lightDigital = data.substring(lightIdx + 8).toInt();
+            systemStatus.lightLevel = lightDigital ? 0 : 100;
         }
         if (waterIdx != -1) {
             systemStatus.waterLevel = data.substring(waterIdx + 8).toInt();
