@@ -1,0 +1,28 @@
+#ifndef CONFIG_H
+#define CONFIG_H
+
+#define SOIL_DRY_THRESHOLD 30
+#define LIGHT_DARK_THRESHOLD 30
+#define WATER_LOW_THRESHOLD 20
+
+#define MIN_WATER_LEVEL 20
+#define MAX_PUMP_DURATION_MS 5000
+#define UPDATE_INTERVAL_MS 1000
+
+#define LED_PORT PORTD
+#define LED_PIN 1
+
+#define PUMP_PORT PORTD
+#define PUMP_PIN 2
+
+#define SOIL_ADC_CHANNEL 8
+#define LIGHT_ADC_CHANNEL 9
+
+#define UART_BAUD_RATE 9600
+
+#define WATER_LEVEL_ADC_PIN 34
+
+#define WIFI_AP_SSID "PlantWatering_ESP32"
+#define WIFI_AP_PASSWORD "12345678"
+
+#endif
