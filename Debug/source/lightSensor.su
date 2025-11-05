@@ -2,7 +2,5 @@ C:\Users\famil\OneDrive\Documents\School\Sem 5\CG2271\Final Project\CMSIS/core_c
 C:\Users\famil\OneDrive\Documents\School\Sem 5\CG2271\Final Project\CMSIS/core_cm0plus.h:795:22:__NVIC_DisableIRQ	16	static
 C:\Users\famil\OneDrive\Documents\School\Sem 5\CG2271\Final Project\CMSIS/core_cm0plus.h:848:22:__NVIC_ClearPendingIRQ	16	static
 C:\Users\famil\OneDrive\Documents\School\Sem 5\CG2271\Final Project\CMSIS/core_cm0plus.h:866:22:__NVIC_SetPriority	24	static
-../source/lightSensor.c:11:6:LightSensor_Init	8	static
-../source/lightSensor.c:33:9:LightSensor_Read	8	static
-../source/lightSensor.c:37:9:LightSensor_IsDark	8	static
-../source/lightSensor.c:41:6:PORTC_PORTD_IRQHandler	8	static
+../source/lightSensor.c:9:6:LightSensor_Init	8	static
+../source/lightSensor.c:32:6:PORTC_PORTD_IRQHandler	8	static

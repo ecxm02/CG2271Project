@@ -4,13 +4,25 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
-../source/main.c 
+../source/led.c \
+../source/lightSensor.c \
+../source/main.c \
+../source/soilMoisture.c \
+../source/waterPump.c 
 
 C_DEPS += \
-./source/main.d 
+./source/led.d \
+./source/lightSensor.d \
+./source/main.d \
+./source/soilMoisture.d \
+./source/waterPump.d 
 
 OBJS += \
-./source/main.o 
+./source/led.o \
+./source/lightSensor.o \
+./source/main.o \
+./source/soilMoisture.o \
+./source/waterPump.o 
 
 
 # Each subdirectory must supply rules for building sources it contributes
@@ -25,7 +37,7 @@ source/%.o: ../source/%.c source/subdir.mk
 clean: clean-source
 
 clean-source:
-	-$(RM) ./source/main.d ./source/main.o
+	-$(RM) ./source/led.d ./source/led.o ./source/lightSensor.d ./source/lightSensor.o ./source/main.d ./source/main.o ./source/soilMoisture.d ./source/soilMoisture.o ./source/waterPump.d ./source/waterPump.o
 
 .PHONY: clean-source
 
