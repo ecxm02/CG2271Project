@@ -1,9 +1,0 @@
-C:\Users\famil\OneDrive\Documents\School\Sem 5\CG2271\Final Project\CMSIS/core_cm0plus.h:757:22:__NVIC_EnableIRQ	16	static
-C:\Users\famil\OneDrive\Documents\School\Sem 5\CG2271\Final Project\CMSIS/core_cm0plus.h:848:22:__NVIC_ClearPendingIRQ	16	static
-C:\Users\famil\OneDrive\Documents\School\Sem 5\CG2271\Final Project\CMSIS/core_cm0plus.h:866:22:__NVIC_SetPriority	24	static
-../source/uart_comm.c:13:6:UART_Init	16	static
-../source/uart_comm.c:41:6:UART_SendChar	16	static
-../source/uart_comm.c:46:6:UART_SendString	16	static
-../source/uart_comm.c:52:6:UART_SendStatus	176	static
-../source/uart_comm.c:65:11:UART_ReceiveCommand	24	static
-../source/uart_comm.c:110:6:UART2_FLEXIO_IRQHandler	16	static

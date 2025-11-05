@@ -1,6 +1,0 @@
-../source/buzzer.c:11:6:Buzzer_Init	8	static
-../source/buzzer.c:18:6:Buzzer_On	8	static
-../source/buzzer.c:23:6:Buzzer_Off	8	static
-../source/buzzer.c:28:6:Buzzer_Toggle	8	static
-../source/buzzer.c:33:6:Buzzer_Beep	24	static
-../source/buzzer.c:39:9:Buzzer_GetStatus	8	static

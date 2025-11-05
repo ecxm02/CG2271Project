@@ -1,2 +1,0 @@
-../source/semihost_hardfault.c:11:29:HardFault_Handler	0	static
-../source/semihost_hardfault.c:23:6:HardFault_HandlerC	16	static
