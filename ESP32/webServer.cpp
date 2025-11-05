@@ -1,6 +1,7 @@
 #include "webServer.h"
 #include <WiFi.h>
 #include <WebServer.h>
+#include "../Common/config.h"
 
 #define AP_SSID "PlantWatering_ESP32"
 #define AP_PASSWORD "12345678"
@@ -88,6 +89,33 @@ const char HTML_PAGE[] PROGMEM = R"rawliteral(
             text-align: center;
             margin-top: 20px;
         }
+        .warning-banner {
+            background-color: #f44336;
+            color: white;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 18px;
+            animation: pulse 2s infinite;
+            box-shadow: 0 4px 10px rgba(244, 67, 54, 0.4);
+        }
+        .warning-banner .icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        .water-low {
+            background-color: #ffebee;
+            border-left: 4px solid #f44336;
+        }
+        .water-low .sensor-value {
+            color: #c62828;
+        }
     </style>
     <script>
         function sendCommand(cmd) {
@@ -101,6 +129,8 @@ const char HTML_PAGE[] PROGMEM = R"rawliteral(
     <div class="container">
         <h1>🌱 Plant Watering System</h1>
         
+        %WARNING_BANNER%
+        
         <div class="sensor-card">
             <div class="sensor-name">Soil Moisture</div>
             <div class="sensor-value">%SOIL%&#37;</div>
@@ -111,7 +141,7 @@ const char HTML_PAGE[] PROGMEM = R"rawliteral(
             <div class="sensor-value">%LIGHT%&#37;</div>
         </div>
         
-        <div class="sensor-card">
+        <div class="sensor-card %WATER_CLASS%">
             <div class="sensor-name">Water Level</div>
             <div class="sensor-value">%WATER%&#37;</div>
         </div>
@@ -132,6 +162,7 @@ const char HTML_PAGE[] PROGMEM = R"rawliteral(
             <button class="button button-danger" onclick="sendCommand('P0')">Pump OFF</button>
             <button class="button" onclick="sendCommand('L1')">LED ON</button>
             <button class="button button-danger" onclick="sendCommand('L0')">LED OFF</button>
+            <button class="button" onclick="sendCommand('A1')" style="width: calc(100% - 10px); background-color: #4caf50; margin-top: 10px;">🔄 Auto Mode</button>
         </div>
     </div>
 </body>
@@ -140,6 +171,20 @@ const char HTML_PAGE[] PROGMEM = R"rawliteral(
 
 void handleRoot() {
     String html = FPSTR(HTML_PAGE);
+    
+    if (currentStatus.waterLevel < WATER_LOW_THRESHOLD) {
+        String warningBanner = "<div class=\"warning-banner\">";
+        warningBanner += "<div class=\"icon\">⚠️</div>";
+        warningBanner += "<div>CRITICAL: WATER LEVEL TOO LOW!</div>";
+        warningBanner += "<div style=\"font-size: 14px; margin-top: 10px;\">Please refill water reservoir immediately</div>";
+        warningBanner += "<div style=\"font-size: 14px;\">🔴 Buzzer Active | 🚫 Watering Disabled</div>";
+        warningBanner += "</div>";
+        html.replace("%WARNING_BANNER%", warningBanner);
+        html.replace("%WATER_CLASS%", "water-low");
+    } else {
+        html.replace("%WARNING_BANNER%", "");
+        html.replace("%WATER_CLASS%", "");
+    }
     
     html.replace("%SOIL%", String(currentStatus.soilMoisture));
     html.replace("%LIGHT%", String(currentStatus.lightLevel));
@@ -157,7 +202,9 @@ void handleRoot() {
 void handleCommand() {
     if (server.hasArg("c")) {
         String cmd = server.arg("c");
+        Serial.print("Sending command to MCXC444: ");
         Serial.println(cmd);
+        Serial2.println(cmd);
         server.send(200, "text/plain", "OK");
     } else {
         server.send(400, "text/plain", "Bad Request");

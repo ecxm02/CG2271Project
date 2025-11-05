@@ -1,0 +1,3 @@
+../source/lightSensor.c:8:6:LightSensor_Init	8	static
+../source/lightSensor.c:16:9:LightSensor_Read	8	static
+../source/lightSensor.c:20:9:LightSensor_IsDark	8	static

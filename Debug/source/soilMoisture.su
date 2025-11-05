@@ -1,0 +1,3 @@
+../source/soilMoisture.c:8:6:SoilMoisture_Init	8	static
+../source/soilMoisture.c:16:9:SoilMoisture_Read	8	static
+../source/soilMoisture.c:20:9:SoilMoisture_IsDry	8	static

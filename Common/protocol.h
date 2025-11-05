@@ -20,7 +20,9 @@ typedef enum {
     CMD_LED_ON = 3,
     CMD_LED_OFF = 4,
     CMD_SET_SOIL_THRESHOLD = 5,
-    CMD_SET_LIGHT_THRESHOLD = 6
+    CMD_SET_LIGHT_THRESHOLD = 6,
+    CMD_SET_WATER_LEVEL = 7,
+    CMD_AUTO_MODE = 8
 } Command_t;
 
 #define CMD_PUMP_ON_STR "P1"
@@ -29,5 +31,7 @@ typedef enum {
 #define CMD_LED_OFF_STR "L0"
 #define CMD_SOIL_THRESHOLD_STR "ST"
 #define CMD_LIGHT_THRESHOLD_STR "LT"
+#define CMD_WATER_LEVEL_STR "W"
+#define CMD_AUTO_MODE_STR "A1"
 
 #endif

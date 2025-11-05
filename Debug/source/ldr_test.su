@@ -1,0 +1,5 @@
+C:\Users\famil\OneDrive\Documents\School\Sem 5\CG2271\Final Project\CMSIS/core_cm0plus.h:866:22:__NVIC_SetPriority	24	static
+C:\Users\famil\OneDrive\Documents\School\Sem 5\CG2271\Final Project\CMSIS/core_cm0plus.h:1074:26:SysTick_Config	16	static
+../source/ldr_test.c:9:6:SysTick_Handler	8	static
+../source/ldr_test.c:13:6:delay_ms	24	static
+../source/ldr_test.c:18:5:main	24	static
