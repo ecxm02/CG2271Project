@@ -53,8 +53,7 @@ utilities/fsl_assert.o utilities/fsl_assert.d: ../utilities/fsl_assert.c \
  C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\component\serial_manager/fsl_component_serial_port_uart.h \
  C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\component\uart/fsl_adapter_uart.h \
  C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\freertos\freertos-kernel\include/FreeRTOS.h \
- C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\freertos\freertos-kernel\template/FreeRTOSConfig.h \
- C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\freertos\freertos-kernel\template\ARM_CM0/FreeRTOSConfig_Gen.h \
+ C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\source/FreeRTOSConfig.h \
  C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\freertos\freertos-kernel\include/projdefs.h \
  C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\freertos\freertos-kernel\include/portable.h \
  C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\freertos\freertos-kernel\include/deprecated_definitions.h \
@@ -114,8 +113,7 @@ C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\component\
 C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\component\serial_manager/fsl_component_serial_port_uart.h:
 C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\component\uart/fsl_adapter_uart.h:
 C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\freertos\freertos-kernel\include/FreeRTOS.h:
-C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\freertos\freertos-kernel\template/FreeRTOSConfig.h:
-C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\freertos\freertos-kernel\template\ARM_CM0/FreeRTOSConfig_Gen.h:
+C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\source/FreeRTOSConfig.h:
 C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\freertos\freertos-kernel\include/projdefs.h:
 C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\freertos\freertos-kernel\include/portable.h:
 C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\freertos\freertos-kernel\include/deprecated_definitions.h:

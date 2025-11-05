@@ -1,8 +1,7 @@
 freertos/freertos-kernel/tasks.o freertos/freertos-kernel/tasks.d: \
  ../freertos/freertos-kernel/tasks.c \
  C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\freertos\freertos-kernel\include/FreeRTOS.h \
- C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\freertos\freertos-kernel\template/FreeRTOSConfig.h \
- C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\freertos\freertos-kernel\template\ARM_CM0/FreeRTOSConfig_Gen.h \
+ C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\source/FreeRTOSConfig.h \
  C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\freertos\freertos-kernel\include/projdefs.h \
  C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\freertos\freertos-kernel\include/portable.h \
  C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\freertos\freertos-kernel\include/deprecated_definitions.h \
@@ -14,8 +13,7 @@ freertos/freertos-kernel/tasks.o freertos/freertos-kernel/tasks.d: \
  C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\freertos\freertos-kernel\include/task.h \
  C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\freertos\freertos-kernel\include/stack_macros.h
 C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\freertos\freertos-kernel\include/FreeRTOS.h:
-C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\freertos\freertos-kernel\template/FreeRTOSConfig.h:
-C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\freertos\freertos-kernel\template\ARM_CM0/FreeRTOSConfig_Gen.h:
+C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\source/FreeRTOSConfig.h:
 C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\freertos\freertos-kernel\include/projdefs.h:
 C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\freertos\freertos-kernel\include/portable.h:
 C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\freertos\freertos-kernel\include/deprecated_definitions.h:
