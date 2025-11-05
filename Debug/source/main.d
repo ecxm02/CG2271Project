@@ -50,6 +50,7 @@ source/main.o source/main.d: ../source/main.c \
  C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\drivers/fsl_clock.h \
  C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\drivers/fsl_common.h \
  C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\drivers/fsl_gpio.h \
+ C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\board/pin_mux.h \
  C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\freertos\freertos-kernel\include/FreeRTOS.h \
  C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\source/FreeRTOSConfig.h \
  C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\freertos\freertos-kernel\include/projdefs.h \
@@ -112,6 +113,7 @@ C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\drivers/fs
 C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\drivers/fsl_clock.h:
 C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\drivers/fsl_common.h:
 C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\drivers/fsl_gpio.h:
+C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\board/pin_mux.h:
 C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\freertos\freertos-kernel\include/FreeRTOS.h:
 C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\source/FreeRTOSConfig.h:
 C:\Users\famil\OneDrive\Documents\School\Sem\ 5\CG2271\Final\ Project\freertos\freertos-kernel\include/projdefs.h:

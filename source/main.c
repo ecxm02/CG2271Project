@@ -7,6 +7,16 @@
 #include "lightSensor.h"
 #include "waterPump.h"
 
+void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName) {
+    (void)xTask;
+    (void)pcTaskName;
+    while(1);
+}
+
+void vApplicationMallocFailedHook(void) {
+    while(1);
+}
+
 void IdleTask(void *pvParameters) {
     while(1) {
         vTaskDelay(pdMS_TO_TICKS(1000));

@@ -1,0 +1,4 @@
+../source/main.c:10:6:vApplicationStackOverflowHook	16	static
+../source/main.c:16:6:vApplicationMallocFailedHook	8	static
+../source/main.c:20:6:IdleTask	16	static
+../source/main.c:26:5:main	16	static
