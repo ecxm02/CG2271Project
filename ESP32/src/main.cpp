@@ -16,6 +16,9 @@ void setup() {
     Serial.begin(115200);
     Serial1.begin(SERIAL_BAUD, SERIAL_8N1, RX_PIN, TX_PIN);
     
+    pinMode(WATER_SENSOR_PIN, INPUT);
+    analogSetAttenuation(ADC_11db);
+    
     WebServer_Init();
     
     Serial.println("\n=== ESP32 Plant Watering System ===");
@@ -52,6 +55,23 @@ void loop() {
     
     int waterLevelRaw = analogRead(WATER_SENSOR_PIN);
     systemStatus.waterLevel = waterLevelRaw;
+    
+    Serial.printf("Water level ADC: %d\n", waterLevelRaw);
+    
+    // Water level safety interlock
+    static bool lastWaterState = true; // assume OK initially
+    bool currentWaterOK = (waterLevelRaw >= 6000);
+    
+    if (currentWaterOK != lastWaterState) {
+        if (currentWaterOK) {
+            Serial.println("TX -> WATER_OK");
+            Serial1.println("WATER_OK");
+        } else {
+            Serial.println("TX -> WATER_LOW");
+            Serial1.println("WATER_LOW");
+        }
+        lastWaterState = currentWaterOK;
+    }
     
     delay(100);
 }

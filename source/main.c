@@ -21,6 +21,7 @@
 static volatile int lastSoilState = 0;
 static volatile bool manualLightControl = false;
 static volatile bool manualPumpControl = false;
+static volatile bool waterLevelLow = false;
 
 static void sendStatusData(void);
 
@@ -76,7 +77,7 @@ static void TaskPumpControl(void *arg) {
             if (s1 == s2 && s2 != lastSoilState) {
                 lastSoilState = s2;
 
-                if (lastSoilState == LEVEL_DRY) {
+                if (lastSoilState == LEVEL_DRY && !waterLevelLow) {
                     WaterPump_On();
                 } else {
                     WaterPump_Off();
@@ -84,6 +85,12 @@ static void TaskPumpControl(void *arg) {
 
                 vTaskDelay(pdMS_TO_TICKS(PUMP_MIN_HOLD_MS));
             }
+        }
+        
+        // Safety check: turn off pump if water level is low
+        if (waterLevelLow && WaterPump_GetState()) {
+            WaterPump_Off();
+            PRINTF("   -> Pump OFF (low water safety)\r\n");
         }
     }
 }
@@ -113,8 +120,13 @@ static void recvTask(void *p) {
             
             if (strcmp(msg.message, "PUMP_ON") == 0) {
                 manualPumpControl = true;
-                WaterPump_On();
-                PRINTF("   -> Pump ON (MANUAL)\r\n");
+                if (!waterLevelLow) {
+                    WaterPump_On();
+                    PRINTF("   -> Pump ON (MANUAL)\r\n");
+                } else {
+                    WaterPump_Off();
+                    PRINTF("   -> Pump remains OFF (low water)\r\n");
+                }
             } else if (strcmp(msg.message, "PUMP_OFF") == 0) {
                 manualPumpControl = true;
                 WaterPump_Off();
@@ -122,6 +134,13 @@ static void recvTask(void *p) {
             } else if (strcmp(msg.message, "PUMP_AUTO") == 0) {
                 manualPumpControl = false;
                 PRINTF("   -> Pump mode AUTO\r\n");
+            } else if (strcmp(msg.message, "WATER_LOW") == 0) {
+                waterLevelLow = true;
+                WaterPump_Off();
+                PRINTF("   -> Water level LOW - pump locked OFF\r\n");
+            } else if (strcmp(msg.message, "WATER_OK") == 0) {
+                waterLevelLow = false;
+                PRINTF("   -> Water level OK - pump unlocked\r\n");
             } else if (strcmp(msg.message, "LIGHT_ON") == 0) {
                 manualLightControl = true;
                 LED_AllOn();
