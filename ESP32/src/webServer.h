@@ -9,6 +9,8 @@ typedef struct {
     uint16_t waterLevel;
     uint8_t pumpStatus;
     uint8_t ledStatus;
+    uint8_t pumpMode;
+    uint8_t lightMode;
 } SystemStatus_t;
 
 void WebServer_Init(void);

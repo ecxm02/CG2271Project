@@ -3,7 +3,7 @@
 #include <ESPAsyncWebServer.h>
 
 #define AP_SSID "ESP32_Water_Level"
-#define AP_PASSWORD "123456789"
+#define AP_PASSWORD "12345678"
 
 AsyncWebServer server(80);
 SystemStatus_t currentStatus = {0};
@@ -44,6 +44,22 @@ const char HTML_PAGE[] PROGMEM = R"rawliteral(
             color: #2e7d32;
             margin: 5px 0;
         }
+        .mode-indicator {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        .mode-auto {
+            background-color: #4caf50;
+            color: white;
+        }
+        .mode-manual {
+            background-color: #ff9800;
+            color: white;
+        }
         .button {
             background-color: #2196F3;
             border: none;
@@ -62,6 +78,13 @@ const char HTML_PAGE[] PROGMEM = R"rawliteral(
         .button:active {
             background-color: #084d8a;
         }
+        .button-auto {
+            background-color: #4caf50;
+            width: calc(50% - 14px);
+        }
+        .button-auto:hover {
+            background-color: #45a049;
+        }
         .controls {
             text-align: center;
             margin-top: 20px;
@@ -70,7 +93,7 @@ const char HTML_PAGE[] PROGMEM = R"rawliteral(
 </head>
 <body>
     <div class="container">
-        <h1>💧 Water Level Monitor</h1>
+        <h1>Water Level Monitor</h1>
         
         <div class="status">
             <div>Water Level (ADC Raw):</div>
@@ -80,16 +103,23 @@ const char HTML_PAGE[] PROGMEM = R"rawliteral(
         <div class="status">
             <div>Relay Status:</div>
             <div class="status-value" id="relayStatus">Loading...</div>
+            <div id="pumpMode"></div>
         </div>
         
         <div class="status">
             <div>Light Status:</div>
             <div class="status-value" id="lightStatus">Loading...</div>
+            <div id="lightMode"></div>
         </div>
         
         <div class="controls">
             <button class="button" onclick="togglePump()">Toggle Pump</button>
             <button class="button" onclick="toggleLight()">Toggle Light</button>
+        </div>
+        
+        <div class="controls">
+            <button class="button button-auto" onclick="setPumpAuto()">Pump → AUTO</button>
+            <button class="button button-auto" onclick="setLightAuto()">Light → AUTO</button>
         </div>
     </div>
 
@@ -106,9 +136,17 @@ const char HTML_PAGE[] PROGMEM = R"rawliteral(
                 .then(response => response.text())
                 .then(data => {
                     const parts = data.split(',');
-                    if (parts.length >= 2) {
+                    if (parts.length >= 4) {
                         document.getElementById('relayStatus').innerText = parts[0].trim();
                         document.getElementById('lightStatus').innerText = parts[1].trim();
+                        
+                        const pumpMode = parts[2].trim();
+                        const lightMode = parts[3].trim();
+                        
+                        document.getElementById('pumpMode').innerHTML = 
+                            '<span class="mode-indicator mode-' + pumpMode.toLowerCase() + '">' + pumpMode + '</span>';
+                        document.getElementById('lightMode').innerHTML = 
+                            '<span class="mode-indicator mode-' + lightMode.toLowerCase() + '">' + lightMode + '</span>';
                     }
                 })
                 .catch(error => console.error('Error:', error));
@@ -129,6 +167,26 @@ const char HTML_PAGE[] PROGMEM = R"rawliteral(
                 .then(response => response.text())
                 .then(data => {
                     console.log('Light toggled:', data);
+                    updateStatus();
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function setPumpAuto() {
+            fetch('/setPumpAuto')
+                .then(response => response.text())
+                .then(data => {
+                    console.log('Pump set to AUTO:', data);
+                    updateStatus();
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function setLightAuto() {
+            fetch('/setLightAuto')
+                .then(response => response.text())
+                .then(data => {
+                    console.log('Light set to AUTO:', data);
                     updateStatus();
                 })
                 .catch(error => console.error('Error:', error));
@@ -177,8 +235,22 @@ void handleToggleLight(AsyncWebServerRequest *request) {
 void handleRelayLightStatus(AsyncWebServerRequest *request) {
     String relayStatus = currentStatus.pumpStatus ? "Relay ON" : "Relay OFF";
     String lightStatus = currentStatus.ledStatus ? "Light ON" : "Light OFF";
-    String status = relayStatus + ", " + lightStatus;
+    String pumpMode = currentStatus.pumpMode ? "MANUAL" : "AUTO";
+    String lightMode = currentStatus.lightMode ? "MANUAL" : "AUTO";
+    String status = relayStatus + ", " + lightStatus + ", " + pumpMode + ", " + lightMode;
     request->send(200, "text/plain", status);
+}
+
+void handleSetPumpAuto(AsyncWebServerRequest *request) {
+    Serial1.println("PUMP_AUTO");
+    currentStatus.pumpMode = 0;
+    request->send(200, "text/plain", "Pump set to AUTO");
+}
+
+void handleSetLightAuto(AsyncWebServerRequest *request) {
+    Serial1.println("LIGHT_AUTO");
+    currentStatus.lightMode = 0;
+    request->send(200, "text/plain", "Light set to AUTO");
 }
 
 void WebServer_Init(void) {
@@ -194,6 +266,8 @@ void WebServer_Init(void) {
     server.on("/togglePump", HTTP_GET, handleTogglePump);
     server.on("/toggleLight", HTTP_GET, handleToggleLight);
     server.on("/relayLightStatus", HTTP_GET, handleRelayLightStatus);
+    server.on("/setPumpAuto", HTTP_GET, handleSetPumpAuto);
+    server.on("/setLightAuto", HTTP_GET, handleSetLightAuto);
     
     server.begin();
     Serial.println("Web server started");

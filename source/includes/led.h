@@ -2,6 +2,7 @@
 #define LED_H
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #define LED_RED   0
 #define LED_GREEN 1
@@ -13,5 +14,6 @@ void LED_Off(uint8_t led);
 void LED_Toggle(uint8_t led);
 void LED_AllOn(void);
 void LED_AllOff(void);
+bool LED_GetState(void);
 
 #endif

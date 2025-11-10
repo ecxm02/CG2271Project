@@ -15,7 +15,6 @@ void parseUARTData(String data);
 void setup() {
     Serial.begin(115200);
     Serial1.begin(SERIAL_BAUD, SERIAL_8N1, RX_PIN, TX_PIN);
-    analogReadResolution(12);
     
     WebServer_Init();
     
@@ -45,9 +44,6 @@ void loop() {
     int waterLevelRaw = analogRead(WATER_SENSOR_PIN);
     systemStatus.waterLevel = waterLevelRaw;
     
-    String waterLevelStr = "WL:" + String(waterLevelRaw);
-    Serial1.println(waterLevelStr);
-    
     WebServer_UpdateStatus(&systemStatus);
     
     delay(100);
@@ -56,36 +52,48 @@ void loop() {
 void parseUARTData(String data) {
     data.trim();
     
-    if (data == "PUMP_ON") {
+    if (data == "PUMP_ON_MANUAL") {
         systemStatus.pumpStatus = 1;
-        Serial.println("PUMP turned ON");
-    } 
-    else if (data == "PUMP_OFF") {
+        systemStatus.pumpMode = 1;
+        Serial.println("PUMP turned ON (MANUAL)");
+    }
+    else if (data == "PUMP_OFF_MANUAL") {
         systemStatus.pumpStatus = 0;
-        Serial.println("PUMP turned OFF");
-    } 
-    else if (data == "LIGHT_ON") {
+        systemStatus.pumpMode = 1;
+        Serial.println("PUMP turned OFF (MANUAL)");
+    }
+    else if (data == "PUMP_ON_AUTO") {
+        systemStatus.pumpStatus = 1;
+        systemStatus.pumpMode = 0;
+        Serial.println("PUMP turned ON (AUTO)");
+    }
+    else if (data == "PUMP_OFF_AUTO") {
+        systemStatus.pumpStatus = 0;
+        systemStatus.pumpMode = 0;
+        Serial.println("PUMP turned OFF (AUTO)");
+    }
+    else if (data == "LIGHT_ON_MANUAL") {
         systemStatus.ledStatus = 1;
-        Serial.println("LIGHT turned ON");
-    } 
-    else if (data == "LIGHT_OFF") {
+        systemStatus.lightMode = 1;
+        Serial.println("LIGHT turned ON (MANUAL)");
+    }
+    else if (data == "LIGHT_OFF_MANUAL") {
         systemStatus.ledStatus = 0;
-        Serial.println("LIGHT turned OFF");
-    } 
-    else if (data.startsWith("Relay")) {
-        if (data.indexOf("Relay ON") != -1) {
-            systemStatus.pumpStatus = 1;
-        } else {
-            systemStatus.pumpStatus = 0;
-        }
-        
-        if (data.indexOf("Light ON") != -1) {
-            systemStatus.ledStatus = 1;
-        } else {
-            systemStatus.ledStatus = 0;
-        }
-        
-        Serial.print("Status: ");
+        systemStatus.lightMode = 1;
+        Serial.println("LIGHT turned OFF (MANUAL)");
+    }
+    else if (data == "LIGHT_ON_AUTO") {
+        systemStatus.ledStatus = 1;
+        systemStatus.lightMode = 0;
+        Serial.println("LIGHT turned ON (AUTO)");
+    }
+    else if (data == "LIGHT_OFF_AUTO") {
+        systemStatus.ledStatus = 0;
+        systemStatus.lightMode = 0;
+        Serial.println("LIGHT turned OFF (AUTO)");
+    }
+    else if (data.startsWith("WL:")) {
+        Serial.print("Water Level: ");
         Serial.println(data);
     }
     else {

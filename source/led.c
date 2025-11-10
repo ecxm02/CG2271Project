@@ -13,6 +13,8 @@
 #define LED_BLUE_GPIO GPIOA
 #define LED_BLUE_PIN 5
 
+static volatile bool lightState = false;
+
 void LED_Init(void) {
     SIM->SCGC5 |= (SIM_SCGC5_PORTA_MASK | SIM_SCGC5_PORTD_MASK);
     
@@ -69,10 +71,16 @@ void LED_AllOn(void) {
     LED_RED_GPIO->PSOR = (1 << LED_RED_PIN);
     LED_GREEN_GPIO->PSOR = (1 << LED_GREEN_PIN);
     LED_BLUE_GPIO->PSOR = (1 << LED_BLUE_PIN);
+    lightState = true;
 }
 
 void LED_AllOff(void) {
     LED_RED_GPIO->PCOR = (1 << LED_RED_PIN);
     LED_GREEN_GPIO->PCOR = (1 << LED_GREEN_PIN);
     LED_BLUE_GPIO->PCOR = (1 << LED_BLUE_PIN);
+    lightState = false;
+}
+
+bool LED_GetState(void) {
+    return lightState;
 }
