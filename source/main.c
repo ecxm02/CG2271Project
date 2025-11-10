@@ -99,9 +99,8 @@ static void sendStatusData(void) {
              lightState ? 1 : 0, 
              manualLightControl ? 1 : 0);
     
-    PRINTF("About to send: [%s] (len=%d)\r\n", statusMessage, strlen(statusMessage));
+    PRINTF("TX -> %s\\r\\n\r\n", statusMessage);
     UART_SendMessage(statusMessage);
-    PRINTF("Sent complete\r\n");
 }
 
 static void recvTask(void *p) {
@@ -110,22 +109,32 @@ static void recvTask(void *p) {
     while(1) {
         UARTMessage_t msg;
         if (xQueueReceive(queue, (UARTMessage_t *)&msg, portMAX_DELAY) == pdTRUE) {
+            PRINTF("RX <- [%s]\r\n", msg.message);
+            
             if (strcmp(msg.message, "PUMP_ON") == 0) {
                 manualPumpControl = true;
                 WaterPump_On();
+                PRINTF("   -> Pump ON (MANUAL)\r\n");
             } else if (strcmp(msg.message, "PUMP_OFF") == 0) {
                 manualPumpControl = true;
                 WaterPump_Off();
+                PRINTF("   -> Pump OFF (MANUAL)\r\n");
             } else if (strcmp(msg.message, "PUMP_AUTO") == 0) {
                 manualPumpControl = false;
+                PRINTF("   -> Pump mode AUTO\r\n");
             } else if (strcmp(msg.message, "LIGHT_ON") == 0) {
                 manualLightControl = true;
                 LED_AllOn();
+                PRINTF("   -> Light ON (MANUAL)\r\n");
             } else if (strcmp(msg.message, "LIGHT_OFF") == 0) {
                 manualLightControl = true;
                 LED_AllOff();
+                PRINTF("   -> Light OFF (MANUAL)\r\n");
             } else if (strcmp(msg.message, "LIGHT_AUTO") == 0) {
                 manualLightControl = false;
+                PRINTF("   -> Light mode AUTO\r\n");
+            } else {
+                PRINTF("   -> Unknown command\r\n");
             }
         }
     }

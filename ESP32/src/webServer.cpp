@@ -1,7 +1,6 @@
 #include "webServer.h"
 #include <WiFi.h>
 #include <ESPAsyncWebServer.h>
-#include <AsyncWebSocket.h>
 
 #define AP_SSID "ESP32_Water_Level"
 #define AP_PASSWORD "12345678"
@@ -213,9 +212,11 @@ void handleStatus(AsyncWebServerRequest *request) {
 
 void handleTogglePump(AsyncWebServerRequest *request) {
     if (currentStatus.pumpStatus == 1) {
+        Serial.println("TX -> PUMP_OFF");
         Serial1.println("PUMP_OFF");
         request->send(200, "text/plain", "Pump turning OFF...");
     } else {
+        Serial.println("TX -> PUMP_ON");
         Serial1.println("PUMP_ON");
         request->send(200, "text/plain", "Pump turning ON...");
     }
@@ -223,9 +224,11 @@ void handleTogglePump(AsyncWebServerRequest *request) {
 
 void handleToggleLight(AsyncWebServerRequest *request) {
     if (currentStatus.ledStatus == 1) {
+        Serial.println("TX -> LIGHT_OFF");
         Serial1.println("LIGHT_OFF");
         request->send(200, "text/plain", "Light turning OFF...");
     } else {
+        Serial.println("TX -> LIGHT_ON");
         Serial1.println("LIGHT_ON");
         request->send(200, "text/plain", "Light turning ON...");
     }
@@ -246,11 +249,13 @@ void handleRelayLightStatus(AsyncWebServerRequest *request) {
 }
 
 void handleSetPumpAuto(AsyncWebServerRequest *request) {
+    Serial.println("TX -> PUMP_AUTO");
     Serial1.println("PUMP_AUTO");
     request->send(200, "text/plain", "Pump set to AUTO");
 }
 
 void handleSetLightAuto(AsyncWebServerRequest *request) {
+    Serial.println("TX -> LIGHT_AUTO");
     Serial1.println("LIGHT_AUTO");
     request->send(200, "text/plain", "Light set to AUTO");
 }
@@ -280,6 +285,9 @@ void WebServer_Init(void) {
     server.on("/relayLightStatus", HTTP_GET, handleRelayLightStatus);
     server.on("/setPumpAuto", HTTP_GET, handleSetPumpAuto);
     server.on("/setLightAuto", HTTP_GET, handleSetLightAuto);
+    server.on("/favicon.ico", HTTP_GET, [](AsyncWebServerRequest *request){
+        request->send(404);
+    });
     
     server.begin();
     Serial.println("Web server started");

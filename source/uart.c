@@ -10,6 +10,7 @@
 
 static char send_buffer[MAX_MSG_LEN];
 static volatile int send_ptr = 0;
+static volatile bool is_sending = false;
 static QueueHandle_t uart_queue = NULL;
 
 void UART_Init(uint32_t baud_rate) {
@@ -53,8 +54,8 @@ void UART_Init(uint32_t baud_rate) {
 
 void UART_SendMessage(char *message) {
     // Wait for previous transmission to complete
-    while (send_ptr != 0) {
-        // Busy wait
+    while (is_sending) {
+        vTaskDelay(pdMS_TO_TICKS(1));
     }
     
     int len = strlen(message);
@@ -62,16 +63,9 @@ void UART_SendMessage(char *message) {
     send_buffer[len] = '\r';
     send_buffer[len + 1] = '\n';
     send_buffer[len + 2] = '\0';
-    
-    // Debug: print what we're actually sending
-    for(int i = 0; i < len + 2; i++) {
-        if(send_buffer[i] == '\r') PRINTF("[CR]");
-        else if(send_buffer[i] == '\n') PRINTF("[LF]");
-        else PRINTF("%c", send_buffer[i]);
-    }
-    PRINTF("\r\n");
 
-    send_ptr = 0;  // Reset pointer before starting transmission
+    send_ptr = 0;
+    is_sending = true;
     UART2->C2 |= UART_C2_TE_MASK;
     UART2->C2 |= UART_C2_TIE_MASK;
 }
@@ -90,6 +84,7 @@ void UART2_FLEXIO_IRQHandler(void) {
             UART2->C2 &= ~UART_C2_TIE_MASK;
             UART2->C2 &= ~UART_C2_TE_MASK;
             send_ptr = 0;
+            is_sending = false;
         } else {
             UART2->D = send_buffer[send_ptr++];
         }
