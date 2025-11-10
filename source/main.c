@@ -141,6 +141,11 @@ static void recvTask(void *p) {
             } else if (strcmp(msg.message, "WATER_OK") == 0) {
                 waterLevelLow = false;
                 PRINTF("   -> Water level OK - pump unlocked\r\n");
+                // Wake up TaskPumpControl to re-evaluate pump state
+                if (!manualPumpControl && lastSoilState == 1) {
+                    SemaphoreHandle_t soilSem = SoilMoisture_GetSemaphore();
+                    xSemaphoreGive(soilSem);
+                }
             } else if (strcmp(msg.message, "LIGHT_ON") == 0) {
                 manualLightControl = true;
                 LED_AllOn();
