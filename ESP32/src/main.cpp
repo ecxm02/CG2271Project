@@ -1,5 +1,4 @@
 #include <Arduino.h>
-#include "waterLevel.h"
 #include "webServer.h"
 
 #define RX_PIN 2
