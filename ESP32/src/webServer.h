@@ -16,6 +16,7 @@ typedef struct {
 void WebServer_Init(void);
 void WebServer_HandleClient(void);
 void WebServer_UpdateStatus(SystemStatus_t *status);
+void WebServer_NotifyClients(void);
 const char* WebServer_GetSSID(void);
 const char* WebServer_GetPassword(void);
 const char* WebServer_GetIPAddress(void);

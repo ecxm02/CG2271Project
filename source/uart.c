@@ -9,6 +9,7 @@
 #define UART2_INT_PRIO 128
 
 static char send_buffer[MAX_MSG_LEN];
+static volatile int send_ptr = 0;
 static QueueHandle_t uart_queue = NULL;
 
 void UART_Init(uint32_t baud_rate) {
@@ -51,11 +52,28 @@ void UART_Init(uint32_t baud_rate) {
 }
 
 void UART_SendMessage(char *message) {
-    strncpy(send_buffer, message, MAX_MSG_LEN);
+    // Wait for previous transmission to complete
+    while (send_ptr != 0) {
+        // Busy wait
+    }
+    
+    int len = strlen(message);
+    strncpy(send_buffer, message, MAX_MSG_LEN - 2);
+    send_buffer[len] = '\r';
+    send_buffer[len + 1] = '\n';
+    send_buffer[len + 2] = '\0';
+    
+    // Debug: print what we're actually sending
+    for(int i = 0; i < len + 2; i++) {
+        if(send_buffer[i] == '\r') PRINTF("[CR]");
+        else if(send_buffer[i] == '\n') PRINTF("[LF]");
+        else PRINTF("%c", send_buffer[i]);
+    }
+    PRINTF("\r\n");
 
-    UART2->C2 |= UART_C2_TIE_MASK;
-
+    send_ptr = 0;  // Reset pointer before starting transmission
     UART2->C2 |= UART_C2_TE_MASK;
+    UART2->C2 |= UART_C2_TIE_MASK;
 }
 
 QueueHandle_t UART_GetQueue(void) {
@@ -63,17 +81,15 @@ QueueHandle_t UART_GetQueue(void) {
 }
 
 void UART2_FLEXIO_IRQHandler(void) {
-    static int recv_ptr = 0, send_ptr = 0;
+    static int recv_ptr = 0;
     char rx_data;
     static char recv_buffer[MAX_MSG_LEN];
 
     if (UART2->S1 & UART_S1_TDRE_MASK) {
         if (send_buffer[send_ptr] == '\0') {
-            send_ptr = 0;
-
             UART2->C2 &= ~UART_C2_TIE_MASK;
-
             UART2->C2 &= ~UART_C2_TE_MASK;
+            send_ptr = 0;
         } else {
             UART2->D = send_buffer[send_ptr++];
         }

@@ -1,11 +1,13 @@
 #include "webServer.h"
 #include <WiFi.h>
 #include <ESPAsyncWebServer.h>
+#include <AsyncWebSocket.h>
 
 #define AP_SSID "ESP32_Water_Level"
 #define AP_PASSWORD "12345678"
 
 AsyncWebServer server(80);
+AsyncWebSocket ws("/ws");
 SystemStatus_t currentStatus = {0};
 
 const char HTML_PAGE[] PROGMEM = R"rawliteral(
@@ -124,40 +126,41 @@ const char HTML_PAGE[] PROGMEM = R"rawliteral(
     </div>
 
     <script>
-        function updateStatus() {
-            fetch('/status')
-                .then(response => response.text())
-                .then(data => {
-                    document.getElementById('waterLevel').innerText = data;
-                })
-                .catch(error => console.error('Error:', error));
+        var ws = new WebSocket('ws://' + window.location.hostname + '/ws');
+        
+        ws.onopen = function() {
+            console.log('WebSocket connected');
+        };
+        
+        ws.onmessage = function(event) {
+            const data = JSON.parse(event.data);
             
-            fetch('/relayLightStatus')
-                .then(response => response.text())
-                .then(data => {
-                    const parts = data.split(',');
-                    if (parts.length >= 4) {
-                        document.getElementById('relayStatus').innerText = parts[0].trim();
-                        document.getElementById('lightStatus').innerText = parts[1].trim();
-                        
-                        const pumpMode = parts[2].trim();
-                        const lightMode = parts[3].trim();
-                        
-                        document.getElementById('pumpMode').innerHTML = 
-                            '<span class="mode-indicator mode-' + pumpMode.toLowerCase() + '">' + pumpMode + '</span>';
-                        document.getElementById('lightMode').innerHTML = 
-                            '<span class="mode-indicator mode-' + lightMode.toLowerCase() + '">' + lightMode + '</span>';
-                    }
-                })
-                .catch(error => console.error('Error:', error));
-        }
+            document.getElementById('relayStatus').innerText = data.pumpStatus ? 'Relay ON' : 'Relay OFF';
+            document.getElementById('lightStatus').innerText = data.ledStatus ? 'Light ON' : 'Light OFF';
+            document.getElementById('waterLevel').innerText = 'Water Level: ' + data.waterLevel;
+            
+            const pumpMode = data.pumpMode ? 'MANUAL' : 'AUTO';
+            const lightMode = data.lightMode ? 'MANUAL' : 'AUTO';
+            
+            document.getElementById('pumpMode').innerHTML = 
+                '<span class="mode-indicator mode-' + pumpMode.toLowerCase() + '">' + pumpMode + '</span>';
+            document.getElementById('lightMode').innerHTML = 
+                '<span class="mode-indicator mode-' + lightMode.toLowerCase() + '">' + lightMode + '</span>';
+        };
+        
+        ws.onerror = function(error) {
+            console.error('WebSocket error:', error);
+        };
+        
+        ws.onclose = function() {
+            console.log('WebSocket disconnected');
+        };
 
         function togglePump() {
             fetch('/togglePump')
                 .then(response => response.text())
                 .then(data => {
                     console.log('Pump toggled:', data);
-                    updateStatus();
                 })
                 .catch(error => console.error('Error:', error));
         }
@@ -167,7 +170,6 @@ const char HTML_PAGE[] PROGMEM = R"rawliteral(
                 .then(response => response.text())
                 .then(data => {
                     console.log('Light toggled:', data);
-                    updateStatus();
                 })
                 .catch(error => console.error('Error:', error));
         }
@@ -177,7 +179,6 @@ const char HTML_PAGE[] PROGMEM = R"rawliteral(
                 .then(response => response.text())
                 .then(data => {
                     console.log('Pump set to AUTO:', data);
-                    updateStatus();
                 })
                 .catch(error => console.error('Error:', error));
         }
@@ -187,13 +188,9 @@ const char HTML_PAGE[] PROGMEM = R"rawliteral(
                 .then(response => response.text())
                 .then(data => {
                     console.log('Light set to AUTO:', data);
-                    updateStatus();
                 })
                 .catch(error => console.error('Error:', error));
         }
-
-        setInterval(updateStatus, 1000);
-        updateStatus();
     </script>
 </body>
 </html>
@@ -204,31 +201,33 @@ void handleRoot(AsyncWebServerRequest *request) {
 }
 
 void handleStatus(AsyncWebServerRequest *request) {
-    String status = "Water Level: " + String(currentStatus.waterLevel);
-    request->send(200, "text/plain", status);
+    String json = "{";
+    json += "\"waterLevel\":" + String(currentStatus.waterLevel) + ",";
+    json += "\"pumpStatus\":" + String(currentStatus.pumpStatus) + ",";
+    json += "\"pumpMode\":" + String(currentStatus.pumpMode) + ",";
+    json += "\"ledStatus\":" + String(currentStatus.ledStatus) + ",";
+    json += "\"lightMode\":" + String(currentStatus.lightMode);
+    json += "}";
+    request->send(200, "application/json", json);
 }
 
 void handleTogglePump(AsyncWebServerRequest *request) {
     if (currentStatus.pumpStatus == 1) {
         Serial1.println("PUMP_OFF");
-        currentStatus.pumpStatus = 0;
-        request->send(200, "text/plain", "Pump turned OFF");
+        request->send(200, "text/plain", "Pump turning OFF...");
     } else {
         Serial1.println("PUMP_ON");
-        currentStatus.pumpStatus = 1;
-        request->send(200, "text/plain", "Pump turned ON");
+        request->send(200, "text/plain", "Pump turning ON...");
     }
 }
 
 void handleToggleLight(AsyncWebServerRequest *request) {
     if (currentStatus.ledStatus == 1) {
         Serial1.println("LIGHT_OFF");
-        currentStatus.ledStatus = 0;
-        request->send(200, "text/plain", "Light turned OFF");
+        request->send(200, "text/plain", "Light turning OFF...");
     } else {
         Serial1.println("LIGHT_ON");
-        currentStatus.ledStatus = 1;
-        request->send(200, "text/plain", "Light turned ON");
+        request->send(200, "text/plain", "Light turning ON...");
     }
 }
 
@@ -238,18 +237,21 @@ void handleRelayLightStatus(AsyncWebServerRequest *request) {
     String pumpMode = currentStatus.pumpMode ? "MANUAL" : "AUTO";
     String lightMode = currentStatus.lightMode ? "MANUAL" : "AUTO";
     String status = relayStatus + ", " + lightStatus + ", " + pumpMode + ", " + lightMode;
+    
+    Serial.printf("Webpage poll -> P:%d(%d) L:%d(%d)\n", 
+                  currentStatus.pumpStatus, currentStatus.pumpMode,
+                  currentStatus.ledStatus, currentStatus.lightMode);
+    
     request->send(200, "text/plain", status);
 }
 
 void handleSetPumpAuto(AsyncWebServerRequest *request) {
     Serial1.println("PUMP_AUTO");
-    currentStatus.pumpMode = 0;
     request->send(200, "text/plain", "Pump set to AUTO");
 }
 
 void handleSetLightAuto(AsyncWebServerRequest *request) {
     Serial1.println("LIGHT_AUTO");
-    currentStatus.lightMode = 0;
     request->send(200, "text/plain", "Light set to AUTO");
 }
 
@@ -261,6 +263,16 @@ void WebServer_Init(void) {
     Serial.print("IP Address: ");
     Serial.println(WiFi.softAPIP());
     
+    ws.onEvent([](AsyncWebSocket *server, AsyncWebSocketClient *client, 
+                  AwsEventType type, void *arg, uint8_t *data, size_t len) {
+        if (type == WS_EVT_CONNECT) {
+            Serial.println("WebSocket client connected");
+        } else if (type == WS_EVT_DISCONNECT) {
+            Serial.println("WebSocket client disconnected");
+        }
+    });
+    
+    server.addHandler(&ws);
     server.on("/", HTTP_GET, handleRoot);
     server.on("/status", HTTP_GET, handleStatus);
     server.on("/togglePump", HTTP_GET, handleTogglePump);
@@ -274,6 +286,18 @@ void WebServer_Init(void) {
 }
 
 void WebServer_HandleClient(void) {
+    ws.cleanupClients();
+}
+
+void WebServer_NotifyClients(void) {
+    String json = "{";
+    json += "\"pumpStatus\":" + String(currentStatus.pumpStatus) + ",";
+    json += "\"pumpMode\":" + String(currentStatus.pumpMode) + ",";
+    json += "\"ledStatus\":" + String(currentStatus.ledStatus) + ",";
+    json += "\"lightMode\":" + String(currentStatus.lightMode) + ",";
+    json += "\"waterLevel\":" + String(currentStatus.waterLevel);
+    json += "}";
+    ws.textAll(json);
 }
 
 void WebServer_UpdateStatus(SystemStatus_t *status) {

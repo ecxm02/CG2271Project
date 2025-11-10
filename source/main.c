@@ -22,6 +22,8 @@ static volatile int lastSoilState = 0;
 static volatile bool manualLightControl = false;
 static volatile bool manualPumpControl = false;
 
+static void sendStatusData(void);
+
 void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName) {
     (void)xTask;
     (void)pcTaskName;
@@ -76,10 +78,8 @@ static void TaskPumpControl(void *arg) {
 
                 if (lastSoilState == LEVEL_DRY) {
                     WaterPump_On();
-                    PRINTF("Pump ON (dry)\r\n");
                 } else {
                     WaterPump_Off();
-                    PRINTF("Pump OFF (wet)\r\n");
                 }
 
                 vTaskDelay(pdMS_TO_TICKS(PUMP_MIN_HOLD_MS));
@@ -93,21 +93,15 @@ static void sendStatusData(void) {
     bool relayState = WaterPump_GetState();
     bool lightState = LED_GetState();
 
-    if (relayState) {
-        snprintf(statusMessage, MAX_MSG_LEN, manualPumpControl ? "PUMP_ON_MANUAL" : "PUMP_ON_AUTO");
-        UART_SendMessage(statusMessage);
-    } else {
-        snprintf(statusMessage, MAX_MSG_LEN, manualPumpControl ? "PUMP_OFF_MANUAL" : "PUMP_OFF_AUTO");
-        UART_SendMessage(statusMessage);
-    }
-
-    if (lightState) {
-        snprintf(statusMessage, MAX_MSG_LEN, manualLightControl ? "LIGHT_ON_MANUAL" : "LIGHT_ON_AUTO");
-        UART_SendMessage(statusMessage);
-    } else {
-        snprintf(statusMessage, MAX_MSG_LEN, manualLightControl ? "LIGHT_OFF_MANUAL" : "LIGHT_OFF_AUTO");
-        UART_SendMessage(statusMessage);
-    }
+    snprintf(statusMessage, MAX_MSG_LEN, "STATUS:%d:%d:%d:%d", 
+             relayState ? 1 : 0, 
+             manualPumpControl ? 1 : 0,
+             lightState ? 1 : 0, 
+             manualLightControl ? 1 : 0);
+    
+    PRINTF("About to send: [%s] (len=%d)\r\n", statusMessage, strlen(statusMessage));
+    UART_SendMessage(statusMessage);
+    PRINTF("Sent complete\r\n");
 }
 
 static void recvTask(void *p) {
@@ -116,45 +110,22 @@ static void recvTask(void *p) {
     while(1) {
         UARTMessage_t msg;
         if (xQueueReceive(queue, (UARTMessage_t *)&msg, portMAX_DELAY) == pdTRUE) {
-            PRINTF("Received: [%s] (len=%d)\r\n", msg.message, strlen(msg.message));
-
-            if (strncmp(msg.message, "WL:", 3) == 0) {
-                int waterLevel = atoi(msg.message + 3);
-                if (waterLevel < 6000) {
-                    PRINTF("Water level too low: %d\r\n", waterLevel);
-                } else {
-                    PRINTF("Water level is sufficient: %d\r\n", waterLevel);
-                }
-            } else if (strcmp(msg.message, "PUMP_ON") == 0) {
+            if (strcmp(msg.message, "PUMP_ON") == 0) {
                 manualPumpControl = true;
                 WaterPump_On();
-                PRINTF(">> Pump turned ON (MANUAL mode)\r\n");
-                sendStatusData();
             } else if (strcmp(msg.message, "PUMP_OFF") == 0) {
                 manualPumpControl = true;
                 WaterPump_Off();
-                PRINTF(">> Pump turned OFF (MANUAL mode)\r\n");
-                sendStatusData();
             } else if (strcmp(msg.message, "PUMP_AUTO") == 0) {
                 manualPumpControl = false;
-                PRINTF(">> Pump control set to AUTO mode\r\n");
-                sendStatusData();
             } else if (strcmp(msg.message, "LIGHT_ON") == 0) {
                 manualLightControl = true;
                 LED_AllOn();
-                PRINTF(">> Light turned ON (MANUAL mode)\r\n");
-                sendStatusData();
             } else if (strcmp(msg.message, "LIGHT_OFF") == 0) {
                 manualLightControl = true;
                 LED_AllOff();
-                PRINTF(">> Light turned OFF (MANUAL mode)\r\n");
-                sendStatusData();
             } else if (strcmp(msg.message, "LIGHT_AUTO") == 0) {
                 manualLightControl = false;
-                PRINTF(">> Light control set to AUTO mode\r\n");
-                sendStatusData();
-            } else {
-                PRINTF("Unknown command\r\n");
             }
         }
     }
@@ -162,8 +133,9 @@ static void recvTask(void *p) {
 
 static void sendTask(void *p) {
     while (1) {
+        PRINTF("sendTask tick\r\n");
         sendStatusData();
-        vTaskDelay(pdMS_TO_TICKS(5000));
+        vTaskDelay(pdMS_TO_TICKS(500));
     }
 }
 
