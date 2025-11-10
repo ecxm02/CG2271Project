@@ -119,8 +119,8 @@ const char HTML_PAGE[] PROGMEM = R"rawliteral(
         </div>
         
         <div class="controls">
-            <button class="button button-auto" onclick="setPumpAuto()">Pump → AUTO</button>
-            <button class="button button-auto" onclick="setLightAuto()">Light → AUTO</button>
+            <button class="button button-auto" onclick="setPumpAuto()">Set Pump AUTO</button>
+            <button class="button button-auto" onclick="setLightAuto()">Set Light AUTO</button>
         </div>
     </div>
 

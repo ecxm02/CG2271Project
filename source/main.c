@@ -16,7 +16,7 @@
 
 #define LDR_POLL_MS 20
 #define DEBOUNCE_MS 30
-#define PUMP_MIN_HOLD_MS 500
+#define PUMP_MIN_HOLD_MS 100
 
 static volatile int lastSoilState = 0;
 static volatile bool manualLightControl = false;
@@ -144,7 +144,7 @@ static void sendTask(void *p) {
     while (1) {
         PRINTF("sendTask tick\r\n");
         sendStatusData();
-        vTaskDelay(pdMS_TO_TICKS(500));
+        vTaskDelay(pdMS_TO_TICKS(100));
     }
 }
 
@@ -165,7 +165,6 @@ int main(void) {
     SoilMoisture_Init();
 
     UART_Init(9600);
-    PRINTF("UART2 DEMO\r\n");
 
     lastSoilState = SoilMoisture_Read();
 
