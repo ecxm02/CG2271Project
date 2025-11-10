@@ -1,20 +1,19 @@
 #include "webServer.h"
 #include <WiFi.h>
 #include <ESPAsyncWebServer.h>
-#include "../Common/config.h"
 
-#define AP_SSID "PlantWatering_ESP32"
-#define AP_PASSWORD "12345678"
+#define AP_SSID "ESP32_Water_Level"
+#define AP_PASSWORD "123456789"
 
 AsyncWebServer server(80);
-static SystemStatus_t currentStatus = {0};
+SystemStatus_t currentStatus = {0};
 
 const char HTML_PAGE[] PROGMEM = R"rawliteral(
 <!DOCTYPE html>
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Plant Watering System</title>
+    <title>Water Level Monitor</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -33,36 +32,17 @@ const char HTML_PAGE[] PROGMEM = R"rawliteral(
             color: #2e7d32;
             text-align: center;
         }
-        .sensor-card {
+        .status {
             background-color: #e8f5e9;
             border-left: 4px solid #4caf50;
             padding: 15px;
-            margin: 10px 0;
+            margin: 15px 0;
             border-radius: 5px;
         }
-        .sensor-name {
-            font-weight: bold;
-            color: #1b5e20;
-        }
-        .sensor-value {
+        .status-value {
             font-size: 24px;
             color: #2e7d32;
             margin: 5px 0;
-        }
-        .status {
-            display: inline-block;
-            padding: 5px 15px;
-            border-radius: 15px;
-            font-weight: bold;
-            margin: 5px 0;
-        }
-        .status-on {
-            background-color: #4caf50;
-            color: white;
-        }
-        .status-off {
-            background-color: #f44336;
-            color: white;
         }
         .button {
             background-color: #2196F3;
@@ -79,122 +59,126 @@ const char HTML_PAGE[] PROGMEM = R"rawliteral(
         .button:hover {
             background-color: #0b7dda;
         }
-        .button-danger {
-            background-color: #f44336;
-        }
-        .button-danger:hover {
-            background-color: #da190b;
+        .button:active {
+            background-color: #084d8a;
         }
         .controls {
             text-align: center;
             margin-top: 20px;
         }
-        .warning-banner {
-            background-color: #f44336;
-            color: white;
-            padding: 20px;
-            margin: 15px 0;
-            border-radius: 10px;
-            text-align: center;
-            font-weight: bold;
-            font-size: 18px;
-            animation: pulse 2s infinite;
-            box-shadow: 0 4px 10px rgba(244, 67, 54, 0.4);
-        }
-        .warning-banner .icon {
-            font-size: 40px;
-            margin-bottom: 10px;
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
-        }
-        .water-low {
-            background-color: #ffebee;
-            border-left: 4px solid #f44336;
-        }
-        .water-low .sensor-value {
-            color: #c62828;
-        }
     </style>
-    <script>
-        setInterval(() => location.reload(), 5000);
-    </script>
 </head>
 <body>
     <div class="container">
-        <h1>🌱 Plant Watering System</h1>
+        <h1>💧 Water Level Monitor</h1>
         
-        %WARNING_BANNER%
-        
-        <div class="sensor-card">
-            <div class="sensor-name">Soil Moisture</div>
-            <div class="sensor-value">%SOIL%&#37;</div>
+        <div class="status">
+            <div>Water Level (ADC Raw):</div>
+            <div class="status-value" id="waterLevel">Loading...</div>
         </div>
         
-        <div class="sensor-card">
-            <div class="sensor-name">Light Level</div>
-            <div class="sensor-value">%LIGHT%&#37;</div>
+        <div class="status">
+            <div>Relay Status:</div>
+            <div class="status-value" id="relayStatus">Loading...</div>
         </div>
         
-        <div class="sensor-card %WATER_CLASS%">
-            <div class="sensor-name">Water Level</div>
-            <div class="sensor-value">%WATER%&#37;</div>
+        <div class="status">
+            <div>Light Status:</div>
+            <div class="status-value" id="lightStatus">Loading...</div>
         </div>
         
-        <div class="sensor-card">
-            <div class="sensor-name">Water Pump</div>
-            <div class="status %PUMP_CLASS%">%PUMP_STATUS%</div>
+        <div class="controls">
+            <button class="button" onclick="togglePump()">Toggle Pump</button>
+            <button class="button" onclick="toggleLight()">Toggle Light</button>
         </div>
-        
-        <div class="sensor-card">
-            <div class="sensor-name">LED Light</div>
-            <div class="status %LED_CLASS%">%LED_STATUS%</div>
-        </div>
-        
     </div>
+
+    <script>
+        function updateStatus() {
+            fetch('/status')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('waterLevel').innerText = data;
+                })
+                .catch(error => console.error('Error:', error));
+            
+            fetch('/relayLightStatus')
+                .then(response => response.text())
+                .then(data => {
+                    const parts = data.split(',');
+                    if (parts.length >= 2) {
+                        document.getElementById('relayStatus').innerText = parts[0].trim();
+                        document.getElementById('lightStatus').innerText = parts[1].trim();
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function togglePump() {
+            fetch('/togglePump')
+                .then(response => response.text())
+                .then(data => {
+                    console.log('Pump toggled:', data);
+                    updateStatus();
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function toggleLight() {
+            fetch('/toggleLight')
+                .then(response => response.text())
+                .then(data => {
+                    console.log('Light toggled:', data);
+                    updateStatus();
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        setInterval(updateStatus, 1000);
+        updateStatus();
+    </script>
 </body>
 </html>
 )rawliteral";
 
-String processor(const String& var){
-    if(var == "SOIL"){
-        return String(currentStatus.soilMoisture);
+void handleRoot(AsyncWebServerRequest *request) {
+    request->send(200, "text/html", HTML_PAGE);
+}
+
+void handleStatus(AsyncWebServerRequest *request) {
+    String status = "Water Level: " + String(currentStatus.waterLevel);
+    request->send(200, "text/plain", status);
+}
+
+void handleTogglePump(AsyncWebServerRequest *request) {
+    if (currentStatus.pumpStatus == 1) {
+        Serial1.println("PUMP_OFF");
+        currentStatus.pumpStatus = 0;
+        request->send(200, "text/plain", "Pump turned OFF");
+    } else {
+        Serial1.println("PUMP_ON");
+        currentStatus.pumpStatus = 1;
+        request->send(200, "text/plain", "Pump turned ON");
     }
-    else if(var == "LIGHT"){
-        return String(currentStatus.lightLevel);
+}
+
+void handleToggleLight(AsyncWebServerRequest *request) {
+    if (currentStatus.ledStatus == 1) {
+        Serial1.println("LIGHT_OFF");
+        currentStatus.ledStatus = 0;
+        request->send(200, "text/plain", "Light turned OFF");
+    } else {
+        Serial1.println("LIGHT_ON");
+        currentStatus.ledStatus = 1;
+        request->send(200, "text/plain", "Light turned ON");
     }
-    else if(var == "WATER"){
-        return String(currentStatus.waterLevel);
-    }
-    else if(var == "PUMP_STATUS"){
-        return currentStatus.pumpStatus ? "ON" : "OFF";
-    }
-    else if(var == "PUMP_CLASS"){
-        return currentStatus.pumpStatus ? "status-on" : "status-off";
-    }
-    else if(var == "LED_STATUS"){
-        return currentStatus.ledStatus ? "ON" : "OFF";
-    }
-    else if(var == "LED_CLASS"){
-        return currentStatus.ledStatus ? "status-on" : "status-off";
-    }
-    else if(var == "WARNING_BANNER"){
-        if (currentStatus.waterLevel < WATER_LOW_THRESHOLD) {
-            String warningBanner = "<div class=\"warning-banner\">";
-            warningBanner += "<div class=\"icon\">⚠️</div>";
-            warningBanner += "<div>CRITICAL: WATER LEVEL TOO LOW!</div>";
-            warningBanner += "<div style=\"font-size: 14px; margin-top: 10px;\">Please refill water reservoir immediately</div>";
-            warningBanner += "<div style=\"font-size: 14px;\">🔴 Buzzer Active | 🚫 Watering Disabled</div>";
-            warningBanner += "</div>";
-            return warningBanner;
-        }
-        return "";
-    }
-    else if(var == "WATER_CLASS"){
-        return (currentStatus.waterLevel < WATER_LOW_THRESHOLD) ? "water-low" : "";
-    }
-    return String();
+}
+
+void handleRelayLightStatus(AsyncWebServerRequest *request) {
+    String relayStatus = currentStatus.pumpStatus ? "Relay ON" : "Relay OFF";
+    String lightStatus = currentStatus.ledStatus ? "Light ON" : "Light OFF";
+    String status = relayStatus + ", " + lightStatus;
+    request->send(200, "text/plain", status);
 }
 
 void WebServer_Init(void) {
@@ -205,28 +189,17 @@ void WebServer_Init(void) {
     Serial.print("IP Address: ");
     Serial.println(WiFi.softAPIP());
     
-    server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
-        request->send_P(200, "text/html", HTML_PAGE, processor);
-    });
-
-    server.on("/command", HTTP_GET, [] (AsyncWebServerRequest *request) {
-        if (request->hasParam("c")) {
-            String cmd = request->getParam("c")->value();
-            Serial.print("Sending command to MCXC444: ");
-            Serial.println(cmd);
-            Serial1.println(cmd);
-            request->send(200, "text/plain", "OK");
-        } else {
-            request->send(400, "text/plain", "Bad Request");
-        }
-    });
+    server.on("/", HTTP_GET, handleRoot);
+    server.on("/status", HTTP_GET, handleStatus);
+    server.on("/togglePump", HTTP_GET, handleTogglePump);
+    server.on("/toggleLight", HTTP_GET, handleToggleLight);
+    server.on("/relayLightStatus", HTTP_GET, handleRelayLightStatus);
     
     server.begin();
     Serial.println("Web server started");
 }
 
 void WebServer_HandleClient(void) {
-    // No longer needed with ESPAsyncWebServer
 }
 
 void WebServer_UpdateStatus(SystemStatus_t *status) {

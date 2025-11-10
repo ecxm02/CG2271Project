@@ -2,13 +2,12 @@
 #include "waterLevel.h"
 #include "webServer.h"
 
-#define RX_PIN 3
+#define RX_PIN 2
 #define TX_PIN 1
 #define SERIAL_BAUD 9600
-#define UPDATE_INTERVAL 1000
+#define WATER_SENSOR_PIN 4
 
 SystemStatus_t systemStatus = {0};
-unsigned long lastUpdate = 0;
 String uartBuffer = "";
 
 void parseUARTData(String data);
@@ -16,8 +15,8 @@ void parseUARTData(String data);
 void setup() {
     Serial.begin(115200);
     Serial1.begin(SERIAL_BAUD, SERIAL_8N1, RX_PIN, TX_PIN);
+    analogReadResolution(12);
     
-    WaterLevel_Init();
     WebServer_Init();
     
     Serial.println("\n=== ESP32 Plant Watering System ===");
@@ -43,59 +42,53 @@ void loop() {
         }
     }
     
-    unsigned long currentTime = millis();
-    if (currentTime - lastUpdate >= UPDATE_INTERVAL) {
-        uint8_t waterLevelRaw = WaterLevel_GetPercentage();
-        systemStatus.waterLevel = waterLevelRaw;
-        
-        String waterCmd = "W" + String(waterLevelRaw);
-        Serial1.println(waterCmd);
-        Serial.print("Sent water level to MCXC444: ");
-        Serial.println(waterCmd);
-        
-        WebServer_UpdateStatus(&systemStatus);
-        
-        lastUpdate = currentTime;
-    }
+    int waterLevelRaw = analogRead(WATER_SENSOR_PIN);
+    systemStatus.waterLevel = waterLevelRaw;
+    
+    String waterLevelStr = "WL:" + String(waterLevelRaw);
+    Serial1.println(waterLevelStr);
+    
+    WebServer_UpdateStatus(&systemStatus);
+    
+    delay(100);
 }
 
 void parseUARTData(String data) {
-    if (data.startsWith("{")) {
-        int soilIdx = data.indexOf("\"soil\":");
-        int lightIdx = data.indexOf("\"light\":");
-        int waterIdx = data.indexOf("\"water\":");
-        int pumpIdx = data.indexOf("\"pump\":");
-        int ledIdx = data.indexOf("\"led\":");
+    data.trim();
+    
+    if (data == "PUMP_ON") {
+        systemStatus.pumpStatus = 1;
+        Serial.println("PUMP turned ON");
+    } 
+    else if (data == "PUMP_OFF") {
+        systemStatus.pumpStatus = 0;
+        Serial.println("PUMP turned OFF");
+    } 
+    else if (data == "LIGHT_ON") {
+        systemStatus.ledStatus = 1;
+        Serial.println("LIGHT turned ON");
+    } 
+    else if (data == "LIGHT_OFF") {
+        systemStatus.ledStatus = 0;
+        Serial.println("LIGHT turned OFF");
+    } 
+    else if (data.startsWith("Relay")) {
+        if (data.indexOf("Relay ON") != -1) {
+            systemStatus.pumpStatus = 1;
+        } else {
+            systemStatus.pumpStatus = 0;
+        }
         
-        if (soilIdx != -1) {
-            uint8_t soilDigital = data.substring(soilIdx + 7).toInt();
-            systemStatus.soilMoisture = soilDigital ? 0 : 100;
-        }
-        if (lightIdx != -1) {
-            uint8_t lightDigital = data.substring(lightIdx + 8).toInt();
-            systemStatus.lightLevel = lightDigital ? 0 : 100;
-        }
-        if (waterIdx != -1) {
-            systemStatus.waterLevel = data.substring(waterIdx + 8).toInt();
-        }
-        if (pumpIdx != -1) {
-            systemStatus.pumpStatus = data.substring(pumpIdx + 7).toInt();
-        }
-        if (ledIdx != -1) {
-            systemStatus.ledStatus = data.substring(ledIdx + 6).toInt();
+        if (data.indexOf("Light ON") != -1) {
+            systemStatus.ledStatus = 1;
+        } else {
+            systemStatus.ledStatus = 0;
         }
         
-        Serial.print("Status Update - Soil:");
-        Serial.print(systemStatus.soilMoisture);
-        Serial.print("% Light:");
-        Serial.print(systemStatus.lightLevel);
-        Serial.print("% Water:");
-        Serial.print(systemStatus.waterLevel);
-        Serial.print("% Pump:");
-        Serial.print(systemStatus.pumpStatus ? "ON" : "OFF");
-        Serial.print(" LED:");
-        Serial.println(systemStatus.ledStatus ? "ON" : "OFF");
-    } else {
+        Serial.print("Status: ");
+        Serial.println(data);
+    }
+    else {
         Serial.print("MCXC444: ");
         Serial.println(data);
     }

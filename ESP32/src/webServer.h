@@ -6,7 +6,7 @@
 typedef struct {
     uint8_t soilMoisture;
     uint8_t lightLevel;
-    uint8_t waterLevel;
+    uint16_t waterLevel;
     uint8_t pumpStatus;
     uint8_t ledStatus;
 } SystemStatus_t;
@@ -17,5 +17,7 @@ void WebServer_UpdateStatus(SystemStatus_t *status);
 const char* WebServer_GetSSID(void);
 const char* WebServer_GetPassword(void);
 const char* WebServer_GetIPAddress(void);
+
+extern SystemStatus_t currentStatus;
 
 #endif
